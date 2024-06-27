@@ -11,6 +11,13 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+      - uses: reecetech/version-increment@2024.4.3
+        id: version
+        with:
+          scheme: conventional_commits
+
+      - run: echo "${{ toJson(steps.version.outputs) }}"
+
       - uses: docker/metadata-action@v5
         id: meta
         with:
@@ -29,6 +36,7 @@ jobs:
 
       - uses: oras-project/setup-oras@v1
       - run: |
-          echo "1" > file.txt
-          oras push --annotation "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-            ghcr.io/${{ github.repository }}/files:${{ steps.meta.outputs.version }} file.txt
+          CHART_NAME=$(yq '.name' chart/Chart.yaml)
+          helm package ./chart --version ${DOCKER_METADATA_OUTPUT_VERSION} --app-version ${DOCKER_METADATA_OUTPUT_VERSION}
+          oras push --annotation "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            ghcr.io/charts/${CHART_NAME}:${DOCKER_METADATA_OUTPUT_VERSION} ${CHART_NAME}-${DOCKER_METADATA_OUTPUT_VERSION}.tgz
