@@ -39,9 +39,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: oras-project/setup-oras@v1
       - run: |
-          CHART_NAME=$(yq '.name' chart/Chart.yaml)
           helm package ./chart --version ${DOCKER_METADATA_OUTPUT_VERSION} --app-version ${DOCKER_METADATA_OUTPUT_VERSION}
-          oras push --annotation "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
-            ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts/${CHART_NAME}:${DOCKER_METADATA_OUTPUT_VERSION} ${CHART_NAME}-${DOCKER_METADATA_OUTPUT_VERSION}.tgz
+          helm push *.tgz oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts
