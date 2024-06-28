@@ -2,7 +2,8 @@ on:
   push:
     branches: ["main"]
     tags: ["*"]
-
+  pull_request:
+    branches: ["main"]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -40,5 +41,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |
-          helm package ./chart --version ${DOCKER_METADATA_OUTPUT_VERSION} --app-version ${DOCKER_METADATA_OUTPUT_VERSION}
-          helm push *.tgz oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts
+          helm package ./chart --version ${{ steps.meta.outputs.version }} --app-version ${{ steps.meta.outputs.version }}
+          helm push *.tgz oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts
